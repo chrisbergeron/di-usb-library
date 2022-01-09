@@ -2,8 +2,13 @@ import threading
 from collections import defaultdict
 import hid
 
+# Nintendo Wii and Playstation version(s) of the Disney Infinity Base (X-Box version is labeled, if it's not labeled, it's Wii or Playstation)
 VENDOR_ID = 0x0e6f
 PRODUCT_ID = 0x0129
+
+# X-Box 360 version of the Disney Infinity Base
+# VENDOR_ID = 0x ????
+# PRODUCT_ID = 0x ????
 
 class InfinityComms(threading.Thread):
     def __init__(self):
@@ -15,7 +20,6 @@ class InfinityComms(threading.Thread):
         self.observers = []
 
     def initBase(self):
- #       hid = hid.init()
         device = hid.device()
         #hid.enumerate()
         #device = hid.open(0x0e6f, 0x0129)
@@ -29,8 +33,11 @@ class InfinityComms(threading.Thread):
         while not self.finish:
             #line = hid_read_timeout(self.device,32,3000)
             #line = read(hid.device, 32)
-            line = hid.device.read(self.device, 64)
-            print(line)
+#last worked            
+            line = hid.device.read(self.device, 64) #works
+#            line = hid.device.read(self.device, 32,3000)
+
+            #print(line)
 
             if not len(line):
                 continue
@@ -68,7 +75,7 @@ class InfinityComms(threading.Thread):
         #\print('In send_message \n\n')
         message_id, message = self.construct_message(command, data)
         result = Deferred()
-        print('Message is: ',format(message))
+        print('Sending / Writing: ',format(message))
         self.pending_requests[message_id] = result
         self.device.write(message)
         #hid.device.write(self.device, message)
@@ -88,7 +95,7 @@ class InfinityComms(threading.Thread):
             message[index] = byte
             checksum = checksum + byte
         message[len(command_bytes)] = checksum & 0xff
-        print('Leave construct_message with message =',message,' \n\n')
+        print('Constructed message =',message,' \n\n')
         #return (message_id, map(chr, message))
         return (message_id, message)
 
@@ -198,24 +205,23 @@ if __name__ == '__main__':
         print(s)
 
     base = InfinityBase()
-
-    base.onTagsChanged = lambda: futurePrint("Tags added or removed.")
-
     base.connect()
+    def printTags(base_to_tag):
+        for b in [1, 2, 3]:
+            if b in base_to_tag:
+                people = base_to_tag[b]
+                print(people)
 
-    base.getAllTags(futurePrint)
+    def updatePrint():
+        base.getAllTags(printTags)
+        base.onTagsChanged = updatePrint
+        updatePrint()
 
-    base.setColor(1, 200, 0, 0)
-
-    base.setColor(2, 0, 56, 0)
-
-    base.fadeColor(3, 0, 0, 200)
-
-    time.sleep(3)
-
-    base.flashColor(3, 0, 0, 200)
-
-    print("Try adding and removing figures and discs to/from the base. CTRL-C to quit")
     while True:
         pass
+
+
+
+
+
 

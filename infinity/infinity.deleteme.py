@@ -2,8 +2,13 @@ import threading
 from collections import defaultdict
 import hid
 
+# Nintendo Wii and Playstation version(s) of the Disney Infinity Base (X-Box version is labeled, if it's not labeled, it's Wii or Playstation)
 VENDOR_ID = 0x0e6f
 PRODUCT_ID = 0x0129
+
+# X-Box 360 version of the Disney Infinity Base
+# VENDOR_ID = 0x ????
+# PRODUCT_ID = 0x ????
 
 class InfinityComms(threading.Thread):
     def __init__(self):
@@ -15,7 +20,6 @@ class InfinityComms(threading.Thread):
         self.observers = []
 
     def initBase(self):
- #       hid = hid.init()
         device = hid.device()
         #hid.enumerate()
         #device = hid.open(0x0e6f, 0x0129)

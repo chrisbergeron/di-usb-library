@@ -68,9 +68,9 @@ class InfinityComms(threading.Thread):
         #\print('In send_message \n\n')
         message_id, message = self.construct_message(command, data)
         result = Deferred()
-        print('Message is: ',format(message))
+        #print('Message is: ',format(message))
         self.pending_requests[message_id] = result
-        self.device.write(message)
+        self.device.send(message)
         #hid.device.write(self.device, message)
         #hid.device.write(self.device, message)
 
@@ -88,9 +88,8 @@ class InfinityComms(threading.Thread):
             message[index] = byte
             checksum = checksum + byte
         message[len(command_bytes)] = checksum & 0xff
-        print('Leave construct_message with message =',message,' \n\n')
-        #return (message_id, map(chr, message))
-        return (message_id, message)
+        print('Leave construct_message with message=',message,' \n\n')
+        return (message_id, map(chr, message))
 
 
 class Deferred(object):

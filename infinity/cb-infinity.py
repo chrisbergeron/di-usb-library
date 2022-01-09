@@ -16,21 +16,15 @@ class InfinityComms(threading.Thread):
 
     def initBase(self):
  #       hid = hid.init()
-        device = hid.device()
-        #hid.enumerate()
+        d = hid.device()
         #device = hid.open(0x0e6f, 0x0129)
-        device.open(VENDOR_ID, PRODUCT_ID)
-        print('\nConnected to Disney Infinity USB Device {}\n'.format(PRODUCT_ID))
-        device.set_nonblocking(False)
-        return device
+        d.open(VENDOR_ID, PRODUCT_ID)
+        d.set_nonblocking(False)
+        return d
 
     def run(self):
-        #print(self)
         while not self.finish:
-            #line = hid_read_timeout(self.device,32,3000)
-            #line = read(hid.device, 32)
-            line = hid.device.read(self.device, 64)
-            print(line)
+            line = hid.hid_read_timeout(self.device,32,3000)
 
             if not len(line):
                 continue
@@ -65,19 +59,13 @@ class InfinityComms(threading.Thread):
         return self.message_number
 
     def send_message(self, command, data = []):
-        #\print('In send_message \n\n')
         message_id, message = self.construct_message(command, data)
         result = Deferred()
-        print('Message is: ',format(message))
         self.pending_requests[message_id] = result
-        self.device.write(message)
-        #hid.device.write(self.device, message)
-        #hid.device.write(self.device, message)
-
+ #       hid.write(self.device, message)
         return Promise(result)
 
     def construct_message(self, command, data):
-        #print('In construct_message')
         message_id = self.next_message_number()
         command_body = [command, message_id] + data
         command_length = len(command_body)
@@ -88,9 +76,7 @@ class InfinityComms(threading.Thread):
             message[index] = byte
             checksum = checksum + byte
         message[len(command_bytes)] = checksum & 0xff
-        print('Leave construct_message with message =',message,' \n\n')
-        #return (message_id, map(chr, message))
-        return (message_id, message)
+        return (message_id, map(chr, message))
 
 
 class Deferred(object):
@@ -149,7 +135,6 @@ class InfinityBase(object):
         activate_message = [0x28,0x63,0x29,0x20,0x44,
                             0x69,0x73,0x6e,0x65,0x79,
                             0x20,0x32,0x30,0x31,0x33]
-        print('Activate Message = ',activate_message)
         self.comms.send_message(0x80, activate_message)
 
     def tagsUpdated(self):
